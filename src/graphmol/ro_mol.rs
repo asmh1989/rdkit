@@ -34,9 +34,20 @@ impl ROMol {
         RWMol { ptr }
     }
 
+    pub fn remove_hs(&self) -> ROMol {
+        let ptr = rdkit_sys::ro_mol_ffi::remove_hs(self.ptr.clone());
+        ROMol { ptr }
+    }
+
     pub fn fingerprint(&self) -> Fingerprint {
         let ptr = fingerprint_ffi::fingerprint_mol(self.ptr.clone());
         Fingerprint::new(ptr)
+    }
+
+    pub fn fingerprint_2_vec(&self) -> Vec<String> {
+        let fingerprint = fingerprint_ffi::fingerprint_mol2(self.ptr.clone());
+        let bytes: Vec<String> = fingerprint.into_iter().map(|x| (*x).to_string()).collect();
+        bytes
     }
 }
 
@@ -70,5 +81,22 @@ impl Default for SmilesParserParams {
         SmilesParserParams {
             ptr: rdkit_sys::ro_mol_ffi::new_smiles_parser_params(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::Properties;
+
+    use super::*;
+
+    #[test]
+    fn test_name() {
+        let mol = ROMol::from_smile("c1ccccc1C(=O)NC").unwrap();
+        let properties = Properties::new();
+        let computed: HashMap<String, f64> = properties.compute_properties(&mol);
+        assert_eq!(*computed.get("NumAtoms").unwrap(), 19.0);
     }
 }

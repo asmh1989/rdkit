@@ -32,6 +32,43 @@ fn test_fragment_parent() {
 }
 
 #[test]
+fn test_fragment_parent2() {
+    let smiles = "[Na]OC(=O)c1ccc(C[S+2]([O-])([O-]))cc1";
+    let romol = ROMol::from_smile(smiles).unwrap();
+
+    let romol = romol.remove_hs();
+
+    let rwmol = romol.as_rw_mol(false, 1);
+
+    let cleanup_params = CleanupParameters::default();
+    let parent_rwmol = fragment_parent(&rwmol, &cleanup_params, true);
+
+    println!(
+        "{:?} : fragment_parent = {:?} ",
+        smiles,
+        parent_rwmol.as_smile()
+    );
+}
+
+#[test]
+fn test_fingerprint() {
+    let smiles = "[Na]OC(=O)c1ccc(C[S+2]([O-])([O-]))cc1";
+    let romol = ROMol::from_smile(smiles).unwrap();
+    let vec = romol.fingerprint_2_vec();
+    println!("{:?}, fingerprint<{}> = {:?}", smiles, vec.len(), vec);
+}
+
+#[test]
+fn test_remove_hs() {
+    let smiles = "[C@]12([H])CCC1CO2";
+    let romol = ROMol::from_smile(smiles).unwrap();
+
+    let romol = romol.remove_hs();
+
+    println!("{:?} : remove_hs = {:?} ", smiles, romol.as_smile());
+}
+
+#[test]
 fn test_enumerate_tautomer() {
     let smiles = "Oc1c(cccc3)c3nc2ccncc12";
     let romol = ROMol::from_smile(smiles).unwrap();
